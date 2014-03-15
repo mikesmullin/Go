@@ -29,13 +29,16 @@ func main() {
     // the loop then returns to accepting, so that
     // multiple connections may be served concurrently.
     go func(c net.Conn) {
-      scanner := bufio.NewScanner(c)
-      for scanner.Scan() {
-        fmt.Println("cmd: ", scanner.Text());
+      reader := bufio.NewReader(c)
+      for {
+        line, err := reader.ReadBytes(0)
+        fmt.Println("line: ", string(line))
+        fmt.Println("err: ", err)
+        if err != nil {
+          break
+        }
       }
-      if err := scanner.Err(); err != nil {
-        fmt.Println("reading input:", err)
-      }
+
       //// echo all incoming data.
       //io.Copy(c, c)
       // shut down the connection
