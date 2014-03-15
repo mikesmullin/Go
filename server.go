@@ -2,7 +2,6 @@ package main
 
 import (
   "fmt"
-//  "io"
   "log"
   "net"
   "bufio"
@@ -29,21 +28,28 @@ func main() {
     // the loop then returns to accepting, so that
     // multiple connections may be served concurrently.
     go func(c net.Conn) {
+      defer func() {
+        fmt.Println("closing socket.")
+        c.Close()
+      }()
       reader := bufio.NewReader(c)
       for {
-        line, err := reader.ReadBytes(0)
-        fmt.Println("line: ", string(line))
-        fmt.Println("err: ", err)
+        bytes, err := reader.ReadBytes(0)
+        line := string(bytes)
+        fmt.Println("line:", line)
         if err != nil {
+          fmt.Println("err:", err)
           break
         }
+        switch line[0] {
+          case '<': // XML
+            fmt.Println("xml")
+          case '{': // JSON
+            fmt.Println("JSON")
+          default:
+            panic("unrecognized format")
+        }
       }
-
-      //// echo all incoming data.
-      //io.Copy(c, c)
-      // shut down the connection
-      fmt.Println("closing socket.")
-      c.Close()
     }(conn)
   }
 }
