@@ -2,9 +2,10 @@ package main
 
 import (
   "fmt"
-  "io"
+//  "io"
   "log"
   "net"
+  "bufio"
 )
 
 func main() {
@@ -28,9 +29,17 @@ func main() {
     // the loop then returns to accepting, so that
     // multiple connections may be served concurrently.
     go func(c net.Conn) {
-      // echo all incoming data.
-      io.Copy(c, c)
+      scanner := bufio.NewScanner(c)
+      for scanner.Scan() {
+        fmt.Println("cmd: ", scanner.Text());
+      }
+      if err := scanner.Err(); err != nil {
+        fmt.Println("reading input:", err)
+      }
+      //// echo all incoming data.
+      //io.Copy(c, c)
       // shut down the connection
+      fmt.Println("closing socket.")
       c.Close()
     }(conn)
   }
